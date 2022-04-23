@@ -21,8 +21,17 @@ app.get("/books", (req, res) => {
 
 app.get("/books/:id", (req, res) => {
   var { id } = req.params;
-  if (books.Books[id]) {
-    var search = books.Books[id];
+  match = false;
+  key = 0;
+  console.log(books[0]._id);
+  for (let i = 0; i < Object.keys(books).length; i++) {
+    if (books[i] != null && books[i]._id == id) {
+      key = i;
+      match = true;
+    }
+  }
+  if (match) {
+    var search = books[key];
   } else {
     var search = "NOT FOUND";
   }
@@ -31,7 +40,7 @@ app.get("/books/:id", (req, res) => {
 
 app.post("/add", (req, res) => {
   const newBook = req.body;
-  books.Books.push(newBook);
+  books.push(newBook);
   var newBook2 = JSON.stringify(books);
   fs.writeFile("bookDictionary.json", newBook2, (err) => {
     if (err) throw err;
@@ -44,22 +53,24 @@ app.put("/update/:id", (req, res) => {
   const { id } = req.params;
   const updatedBook = req.body;
   //   console.log(books);
+  key = 0;
   match = false;
   for (let i = 0; i < Object.keys(books).length; i++) {
-    if (books[i]._id == id) {
+    if (books[i] != null && books[i]._id == id) {
+      key = i;
       match = true;
     }
   }
   if (match) {
-    books.Books.splice(id, 0, updatedBook);
-    delId = parseInt(id) + 1;
-    delete books.Books[id];
+    books.splice(key, 0, updatedBook);
+    delIkey = parseInt(key) + 1;
+    delete books[delIkey];
     console.log(books);
-    books = books.Books.filter(function (x) {
+    books = books.filter(function (x) {
       return x !== null;
     });
     fs.writeFileSync("bookDictionary.json", JSON.stringify(books));
-    res.send({ updatedData: books.Books[id - 1], Books: books });
+    res.send({ Books: books });
   } else {
     res.send("ID not found");
   }
@@ -67,10 +78,18 @@ app.put("/update/:id", (req, res) => {
 
 app.delete("/delete/:id", (req, res) => {
   const { id } = req.params;
-  if (books.Books[id]) {
-    var deletedObj = books.Books[id];
-    delete books.Books[id];
-    books = books.Books.filter(function (x) {
+  key = 0;
+  match = false;
+  for (let i = 0; i < Object.keys(books).length; i++) {
+    if (books[i] != null && books[i]._id == id) {
+      key = i;
+      match = true;
+    }
+  }
+  if (match) {
+    var deletedObj = books[key];
+    delete books[key];
+    books = books.filter(function (x) {
       return x !== null;
     });
     fs.writeFileSync("bookDictionary.json", JSON.stringify(books), (err) => {
